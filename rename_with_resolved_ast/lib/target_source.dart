@@ -9,6 +9,7 @@ void main() async {
   await inkJetPrinter.print(printText);
   await laserPrinter.print(printText);
 }
+
 class InkJetPrinter {
   Future<void> print(String message) async {
     await Future.delayed(Duration(seconds: 1));
@@ -26,13 +27,6 @@ class LaserPrinter {
   Future<void> print(String message) async {
     await Future.delayed(Duration(seconds: 1));
     log('Laser printing: $message');
-  }
-}
-
-class Printer {
-  Future<void> print(String message) async {
-    await Future.delayed(Duration(seconds: 1));
-    log('Generic printing: $message');
   }
 
   Future<void> printMultiple(List<String> messages) async {

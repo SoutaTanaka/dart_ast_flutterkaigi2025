@@ -7,23 +7,19 @@ import 'package:analyzer/dart/ast/syntactic_entity.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/element.dart';
 
-class MethodCallCollector extends RecursiveAstVisitor<void> {
+class InkJetPrintVisitor extends RecursiveAstVisitor<void> {
   final List<SyntacticEntity> methodNames = [];
 
-  MethodCallCollector();
+  InkJetPrintVisitor();
 
   @override
   void visitMethodInvocation(MethodInvocation node) {
     final element = node.methodName.element;
-
-    if (element is MethodElement) {
-      final methodName = element.name;
+    if (element is MethodElement && node.methodName.name == 'print') {
       final enclosingElement = element.enclosingElement;
-
       // 指定されたクラスのメソッドかチェック
       if (enclosingElement is ClassElement &&
-          enclosingElement.name == 'InkJetPrinter' &&
-          methodName == 'print') {
+          enclosingElement.name == 'InkJetPrinter') {
         methodNames.add(node.methodName);
       }
     }
@@ -62,40 +58,24 @@ Future<void> main() async {
           as ResolvedUnitResult;
 
   final unit = result.unit;
-  final collector = MethodCallCollector();
-  unit.accept(collector);
-  print('${collector.methodNames.length} 件のInkJetPrinter.printの呼び出しが見つかりました！');
-  for (final methodCall in collector.methodNames) {
-    print('オフセット: ${methodCall.offset}');
-  }
+  final visitor = InkJetPrintVisitor();
+  unit.accept(visitor);
 
-  final methodCalls = collector.methodNames;
-  // 編集後のソースコードを構築するためのStringBuffer
+  final methodNames = visitor.methodNames
+    ..sort((a, b) => a.offset.compareTo(b.offset));
+
   final buffer = StringBuffer();
   int lastOffset = 0;
-
-  // visitorが収集したmethodCallsはソースコード内の順序でない可能性があるため、オフセットでソート
-  methodCalls.sort((a, b) => a.offset.compareTo(b.offset));
-
-  for (var call in methodCalls) {
-    // MethodInvocationからmethodNameの部分のAstNodeを取得
-    final methodName = call;
-    // オフセットと長さを取得
-    final offset = methodName.offset;
-    final length = methodName.length;
-
-    //元のソースコードの、最後に追加した位置から現在のprint呼び出しの直前までを追加
-    buffer.write(sourceCode.substring(lastOffset, offset));
-
-    // 'print'を'log.info'に置き換え
+  for (var call in methodNames) {
+    //元のソースコードのprint以外のソースコードをbufferに追加
+    buffer.write(sourceCode.substring(lastOffset, call.offset));
+    // 'print'の代わりに'printout'をbufferに追加
     buffer.write('printout');
-
-    // lastOffsetを更新
-    lastOffset = offset + length;
+    // 次のループでprintの次からをbufferに追加できるようにoffsetをずらす
+    lastOffset = call.length + call.offset;
   }
-
-  // Add remaining text
+  // 最後のprintより後のコードをbufferに追加
   buffer.write(sourceCode.substring(lastOffset));
-  final modifiedSourceCode = buffer.toString();
-  print('修正後のソースコード:\n$modifiedSourceCode');
+
+  print('修正後のソースコード:\n${buffer.toString()}');
 }
