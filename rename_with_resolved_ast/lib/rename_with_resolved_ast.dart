@@ -47,8 +47,8 @@ class InkJetPrintVisitor extends RecursiveAstVisitor<void> {
 }
 
 Future<void> main() async {
+  // Resolved ASTを生成する
   final targetPath = File('lib/target_source.dart').absolute.path;
-  final sourceCode = await File(targetPath).readAsString();
   final collection = AnalysisContextCollection(
     includedPaths: [Directory(targetPath).parent.path],
   );
@@ -56,14 +56,15 @@ Future<void> main() async {
   final result =
       await context.currentSession.getResolvedUnit(targetPath)
           as ResolvedUnitResult;
-
   final unit = result.unit;
+
   final visitor = InkJetPrintVisitor();
   unit.accept(visitor);
 
   final methodNames = visitor.methodNames
     ..sort((a, b) => a.offset.compareTo(b.offset));
 
+  final sourceCode = await File(targetPath).readAsString();
   final buffer = StringBuffer();
   int lastOffset = 0;
   for (var call in methodNames) {
