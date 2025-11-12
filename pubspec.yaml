@@ -1,8 +1,10 @@
 name: dart_ast_flutterkaigi2025
 publish_to: none
 environment:
-  sdk: ^3.9.0
+  sdk: ^3.9.2
 workspace:
   - rename_print
   - search_print
   - rename_with_resolved_ast
+dependencies:
+  analyzer: ^8.4.1
