@@ -20,7 +20,7 @@ void main() {
 // Dartでprinterを制御して印刷する
 void main() async {
   final printText = 'print';
-  var printer = Printer();
+  final printer = Printer();
   await printer.print(printText);
   print('print(Done!)');
 }
