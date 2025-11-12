@@ -26,22 +26,18 @@ class InkJetPrintVisitor extends RecursiveAstVisitor<void> {
     super.visitMethodInvocation(node);
   }
 
+  // メソッド宣言も書き換えれるように
   @override
   void visitMethodDeclaration(MethodDeclaration node) {
-    // メソッド宣言も書き換えれるように
     final element = node.declaredFragment?.element;
-    if (element is MethodElement) {
-      final methodName = element.name;
+    if (element is MethodElement && element.name == 'print') {
       final enclosingElement = element.enclosingElement;
-
       // 指定されたクラスのメソッドかチェック
       if (enclosingElement is ClassElement &&
-          enclosingElement.name == 'InkJetPrinter' &&
-          methodName == 'print') {
+          enclosingElement.name == 'InkJetPrinter') {
         methodNames.add(node.name);
       }
     }
-
     super.visitMethodDeclaration(node);
   }
 }
