@@ -1,6 +1,6 @@
-// Dartでprinterを制御して印刷する
 import 'dart:developer';
 
+// Dartでprinterを制御してprintする
 void main() async {
   final printText = 'print';
   final inkJetPrinter = InkJetPrinter();

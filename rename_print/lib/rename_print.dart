@@ -17,7 +17,7 @@ class PrintCallVisitor extends RecursiveAstVisitor<void> {
 
 void main() {
   final sourceCode = '''
-// Dartでprinterを制御して印刷する
+// Dartでprinterを制御してprintする
 void main() async {
   final printText = 'print';
   final printer = Printer();
